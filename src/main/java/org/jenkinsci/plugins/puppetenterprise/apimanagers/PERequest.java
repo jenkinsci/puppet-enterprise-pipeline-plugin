@@ -127,9 +127,20 @@ public abstract class PERequest {
     return HttpClients.custom().setSSLSocketFactory(sslsf).build();
   }
 
+  public final PEResponse send(URI uri, Object body, String method) throws Exception {
+    this.method = method;
+    this.body = body;
+    return this.send(uri);
+  }
+
   public final PEResponse send(URI uri, Object body) throws Exception {
     this.method = "POST";
     this.body = body;
+    return this.send(uri);
+  }
+
+  public final PEResponse send(URI uri, String method) throws Exception {
+    this.method = method;
     return this.send(uri);
   }
 
