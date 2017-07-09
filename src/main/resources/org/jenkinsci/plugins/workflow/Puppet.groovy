@@ -74,6 +74,66 @@ class Puppet implements Serializable {
     }
   }
 
+  public <V> V nodeGroup(Map parameters = [:]) {
+    String credentials
+    String environment
+    String parent
+    ArrayList rule
+    Boolean environment_trumps
+    String description
+    HashMap classes
+    HashMap variables
+
+    node {
+      if (parameters.environment) {
+        assert parameters.environment instanceof String
+        environment = parameters.environment
+      }
+
+      if (parameters.environment_trumps) {
+        assert parameters.environment_trumps instanceof Boolean
+        environment_trumps = parameters.environment_trumps
+      }
+
+      if (parameters.parent) {
+        assert parameters.parent instanceof String
+        parent = parameters.parent
+      }
+
+      if (parameters.rule) {
+        assert parameters.rule instanceof ArrayList
+        rule = parameters.Rule
+      }
+
+      if (parameters.classes) {
+        assert parameters.classes instanceof HashMap
+        classes = parameters.classes
+      }
+
+      if (parameters.variables) {
+        assert parameters.variable instanceof HashMap
+        variables = parameters.variables
+      }
+
+      if (parameters.credentials) {
+        credentials = parameters.credentials
+      } else {
+        credentials = credentialsId
+      }
+
+      if(credentials == null) {
+        script.error(message: "No Credentials provided for puppet.codeDeploy. Specify 'credentials' parameter or use puppet.credentials()")
+      }
+
+      try {
+        script.puppetNodeGroup(environment: environment, rule: rule, parent: parent, environmentTrumps: environment_trumps, classes: classes, variables: variables, credentialsId: credentials)
+      } catch(err) {
+        script.error(message: err.message)
+      }
+    }
+
+  }
+
   public <V> V job(Map parameters = [:], String env) {
     String credentials
     String application
