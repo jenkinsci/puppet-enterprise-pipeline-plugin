@@ -14,12 +14,12 @@ public class PuppetNodeGroup {
   private String name = null;
   private String id = null;
   private String description = null;
-  private String environment = null;
+  private String environment = "production";
   private Boolean environment_trumps = null;
   private String parent = null;
-  private ArrayList<Object> rule = null;
-  private HashMap classes = null;
-  private HashMap variables = null;
+  private ArrayList rule = null;
+  private HashMap classes = new HashMap();
+  private HashMap variables = new HashMap();
   private PrintStream logger = null;
   private ArrayList<NodeGroupV1> groups = null;
   private String token = null;
@@ -54,7 +54,7 @@ public class PuppetNodeGroup {
     this.parent = parent;
   }
 
-  public void setRule(ArrayList<Object> rule) {
+  public void setRule(ArrayList rule) {
     this.rule = rule;
   }
 
@@ -79,10 +79,9 @@ public class PuppetNodeGroup {
   }
 
   public ArrayList<NodeGroupV1> getGroups() throws NodeManagerException, Exception {
-    if (this.groups != null) {
-      NodeManagerGroupsV1 groups = new NodeManagerGroupsV1();
-      this.groups = groups.getAll();
-    }
+    NodeManagerGroupsV1 groups = new NodeManagerGroupsV1();
+    groups.setToken(this.token);
+    this.groups = groups.getAll();
 
     return this.groups;
   }
@@ -91,30 +90,54 @@ public class PuppetNodeGroup {
     NodeManagerGroupsV1 groups = new NodeManagerGroupsV1();
 
     groups.setClasses(this.classes);
+    groups.setDescription(this.description);
     groups.setVariables(this.variables);
     groups.setEnvironment(this.environment);
     groups.setEnvironmentTrumps(this.environment_trumps);
     groups.setName(this.name);
-    groups.setDescription(this.description);
-    groups.setParent(this.parent);
     groups.setToken(this.token);
 
+    if (this.parent != null) {
+      groups.setParent(getGroupParentId(this.parent));
+    }
 
     if (groupExists()) {
+      NodeGroupV1 group = getGroup(this.name);
+
       if (this.rule != null) {
         throw new Exception("The existing node group named \"" + this.name + "\" cannot have its rule updated.");
       }
 
+      if (this.parent != null) {
+        groups.setParent(this.parent);
+      } else {
+        groups.setParent(group.getParent());
+      }
+
+      if (this.description != null) {
+        groups.setDescription(this.description);
+      } else {
+        groups.setDescription(group.getDescription());
+      }
+
+      groups.setId(group.getId());
       groups.update();
 
     } else {
-      groups.setRule(this.rule);
+      if (this.rule != null) {
+        groups.setRule(this.rule);
+      }
+
       groups.create();
     }
   }
 
   public void delete() throws NodeManagerException, Exception {
     NodeManagerGroupsV1 groups = new NodeManagerGroupsV1();
+
+    groups.setName(this.name);
+    groups.setId(getGroupId(this.name));
+    groups.setToken(this.token);
 
     if (groupExists()) {
       groups.delete();
@@ -123,26 +146,41 @@ public class PuppetNodeGroup {
     }
   }
 
+  private NodeGroupV1 getGroup(String groupName) throws NodeManagerException, Exception {
+    NodeGroupV1 nodeGroup = new NodeGroupV1();
+
+    for ( NodeGroupV1 group : this.getGroups() ) {
+      if (group.getName().equals(groupName)) {
+        nodeGroup = group;
+      }
+    }
+
+    return nodeGroup;
+  }
+
+  private String getGroupParentId(String groupName) throws NodeManagerException, Exception {
+    return getGroup(groupName).getParent();
+  }
+
   private String getGroupId(String name) throws NodeManagerException, Exception {
     for ( NodeGroupV1 group : this.getGroups() ) {
-      if (group.getName() == this.getName()) {
+      if (group.getName().equals(name)) {
         return group.getId();
       }
     }
 
     //Return null if we didn't find anything
     return null;
-
   }
 
   private Boolean groupExists() throws NodeManagerException, Exception {
     for ( NodeGroupV1 group : this.getGroups() ) {
-      if (group.getName() == this.getName()) {
+      if (group.getName().equals(this.getName())) {
         id = group.getId();
-        return false;
+        return true;
       }
     }
 
-    return true;
+    return false;
   }
 }

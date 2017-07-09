@@ -76,6 +76,7 @@ class Puppet implements Serializable {
 
   public <V> V nodeGroup(Map parameters = [:]) {
     String credentials
+    String name
     String environment
     String parent
     ArrayList rule
@@ -83,8 +84,23 @@ class Puppet implements Serializable {
     String description
     HashMap classes
     HashMap variables
+    Boolean delete
 
     node {
+      if (parameters.name) {
+        assert parameters.name instanceof String
+        name = parameters.name
+      }
+
+      if (parameters.delete) {
+        assert parameters.delete instanceof Boolean
+        delete = parameters.delete
+      }
+      if (parameters.description) {
+        assert parameters.description instanceof String
+        description = parameters.description
+      }
+
       if (parameters.environment) {
         assert parameters.environment instanceof String
         environment = parameters.environment
@@ -102,7 +118,7 @@ class Puppet implements Serializable {
 
       if (parameters.rule) {
         assert parameters.rule instanceof ArrayList
-        rule = parameters.Rule
+        rule = parameters.rule
       }
 
       if (parameters.classes) {
@@ -126,7 +142,7 @@ class Puppet implements Serializable {
       }
 
       try {
-        script.puppetNodeGroup(environment: environment, rule: rule, parent: parent, environmentTrumps: environment_trumps, classes: classes, variables: variables, credentialsId: credentials)
+        script.puppetNodeGroup(name: name, delete: delete, description: description, environment: environment, rule: rule, parent: parent, environmentTrumps: environment_trumps, classes: classes, variables: variables, credentialsId: credentials)
       } catch(err) {
         script.error(message: err.message)
       }

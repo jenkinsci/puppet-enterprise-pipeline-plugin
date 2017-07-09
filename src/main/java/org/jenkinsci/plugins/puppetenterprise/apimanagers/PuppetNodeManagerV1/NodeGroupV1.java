@@ -14,7 +14,7 @@ public class NodeGroupV1 {
   private String environment = null;
   private Boolean environment_trumps = null;
   private String parent = null;
-  private LinkedTreeMap rule = null;
+  //private LinkedTreeMap rule = null;
   private HashMap classes = null;
   private HashMap deleted = null;
   private HashMap variables = null;
@@ -43,9 +43,9 @@ public class NodeGroupV1 {
     return this.parent;
   }
 
-  public LinkedTreeMap getRule() {
-    return this.rule;
-  }
+  //public LinkedTreeMap getRule() {
+    //return this.rule;
+  //}
 
   public HashMap getClasses() {
     return this.classes;

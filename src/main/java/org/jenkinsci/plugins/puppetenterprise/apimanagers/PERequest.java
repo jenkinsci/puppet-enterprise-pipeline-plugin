@@ -162,6 +162,25 @@ public abstract class PERequest {
     try {
       HttpResponse response = null;
 
+      if (method.equals("DELETE")) {
+        HttpDelete request = new HttpDelete(uri.toString());
+        request.addHeader("X-Authentication", accessToken);
+        response = httpClient.execute(request);
+      }
+
+      if (method.equals("PUT")) {
+        HttpPut request = new HttpPut(uri.toString());
+
+        if (body != null) {
+          request.addHeader("content-type", "application/json");
+          request.addHeader("X-Authentication", accessToken);
+          System.out.println(gson.toJson(this.body));
+          StringEntity requestJson = new StringEntity(gson.toJson(this.body));
+          request.setEntity(requestJson);
+        }
+        response = httpClient.execute(request);
+      }
+
       if (method.equals("POST")) {
         HttpPost request = new HttpPost(uri.toString());
 
@@ -181,6 +200,7 @@ public abstract class PERequest {
       }
 
       String json = IOUtils.toString(response.getEntity().getContent());
+      System.out.println(json);
       Integer responseCode = response.getStatusLine().getStatusCode();
 
       peResponse = new PEResponse(new Object(), responseCode, json);

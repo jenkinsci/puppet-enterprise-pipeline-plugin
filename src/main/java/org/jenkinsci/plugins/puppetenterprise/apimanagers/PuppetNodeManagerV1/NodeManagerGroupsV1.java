@@ -18,10 +18,14 @@ import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetnodemanagerv1.No
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetnodemanagerv1.NodeGroupV1;
 
 public class NodeManagerGroupsV1 extends PuppetNodeManagerV1 {
-  private URI uri = null;
   private NodeManagerGroupsRequest request = null;
   private NodeGroupV1 response = null;
+  private String id = null;
   Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'").create();
+
+  public void setId(String id) {
+    this.id = id;
+  }
 
   public void setClasses(HashMap classes) {
     request.classes = classes;
@@ -51,17 +55,17 @@ public class NodeManagerGroupsV1 extends PuppetNodeManagerV1 {
     request.parent = parent;
   }
 
-  public void setRule(ArrayList<Object> rule) {
+  public void setRule(ArrayList rule) {
     request.rule = rule;
   }
 
   public NodeManagerGroupsV1() throws Exception {
-    this.uri = getURI("/groups");
     this.request = new NodeManagerGroupsRequest();
   }
 
   public ArrayList<NodeGroupV1> getAll() throws NodeManagerException, Exception {
-    PEResponse peResponse = send(this.uri, "GET");
+    URI uri = getURI("/groups");
+    PEResponse peResponse = send(uri, "GET");
     ArrayList<NodeGroupV1> groups = null;
 
     if (isSuccessful(peResponse)) {
@@ -75,7 +79,8 @@ public class NodeManagerGroupsV1 extends PuppetNodeManagerV1 {
   }
 
   public void update() throws NodeManagerException, Exception {
-    PEResponse peResponse = send(this.uri, this.request, "PUT");
+    URI uri = getURI("/groups/" + this.id);
+    PEResponse peResponse = send(uri, this.request, "PUT");
 
     if (isSuccessful(peResponse)) {
       response = gson.fromJson(peResponse.getJSON(), NodeGroupV1.class);
@@ -85,7 +90,8 @@ public class NodeManagerGroupsV1 extends PuppetNodeManagerV1 {
   }
 
   public void create() throws NodeManagerException, Exception {
-    PEResponse peResponse = send(this.uri, this.request, "POST");
+    URI uri = getURI("/groups");
+    PEResponse peResponse = send(uri, this.request, "POST");
 
     if (isSuccessful(peResponse)) {
       response = gson.fromJson(peResponse.getJSON(), NodeGroupV1.class);
@@ -95,7 +101,8 @@ public class NodeManagerGroupsV1 extends PuppetNodeManagerV1 {
   }
 
   public void delete() throws NodeManagerException, Exception {
-    PEResponse peResponse = send(this.uri, this.request, "DELETE");
+    URI uri = getURI("/groups/" + this.id);
+    PEResponse peResponse = send(uri, this.request, "DELETE");
 
     if (isSuccessful(peResponse)) {
       response = gson.fromJson(peResponse.getJSON(), NodeGroupV1.class);
@@ -123,7 +130,7 @@ public class NodeManagerGroupsV1 extends PuppetNodeManagerV1 {
     public Boolean environment_trumps = null;
     public String description = null;
     public String parent = null;
-    public ArrayList<Object> rule = null;
+    public ArrayList rule = null;
     public HashMap classes = null;
     public HashMap variables = null;
   }

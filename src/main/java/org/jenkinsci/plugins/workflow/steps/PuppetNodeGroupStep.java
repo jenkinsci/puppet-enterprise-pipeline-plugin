@@ -50,8 +50,10 @@ public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements S
 
   private String name = null;
   private String environment = null;
+  private String parent = null;
   private Boolean environmentTrumps = null;
-  private ArrayList<Object> rule = null;
+  private String description = null;
+  private ArrayList rule = null;
   private HashMap classes = null;
   private HashMap variables = null;
   private Boolean delete = false;
@@ -60,8 +62,16 @@ public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements S
     this.name = name;
   }
 
-  @DataBoundSetter private void setDelete(Boolean deletel) {
+  @DataBoundSetter private void setDescription(String description) {
+    this.description = description;
+  }
+
+  @DataBoundSetter private void setDelete(Boolean delete) {
     this.delete = delete;
+  }
+
+  @DataBoundSetter private void setParent(String parent) {
+    this.parent = parent;
   }
 
   @DataBoundSetter private void setEnvironment(String environment) {
@@ -72,7 +82,7 @@ public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements S
     this.environmentTrumps = environmentTrumps;
   }
 
-  @DataBoundSetter private void setRule(ArrayList<Object> rule) {
+  @DataBoundSetter private void setRule(ArrayList rule) {
     this.rule = rule;
   }
 
@@ -96,7 +106,7 @@ public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements S
     return this.environmentTrumps;
   }
 
-  public ArrayList<Object> getRule() {
+  public ArrayList getRule() {
     return this.rule;
   }
 
@@ -112,6 +122,14 @@ public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements S
     return this.delete;
   }
 
+  public String getDescription() {
+    return this.description;
+  }
+
+  public String getParent() {
+    return this.parent;
+  }
+
   @DataBoundConstructor public PuppetNodeGroupStep() { }
 
   public static class PuppetNodeGroupStepExecution extends AbstractSynchronousStepExecution<Void> {
@@ -122,12 +140,35 @@ public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements S
 
     @Override protected Void run() throws Exception {
       PuppetNodeGroup group = new PuppetNodeGroup();
-      group.setName(step.getName());
-      group.setEnvironment(step.getEnvironment());
-      group.setEnvironmentTrumps(step.getEnvironmentTrumps());
-      group.setClasses(step.getClasses());
-      group.setVariables(step.getVariables());
-      group.setRule(step.getRule());
+      group.setName(step.getName());     //Required
+
+      if (step.getParent() != null) {
+        group.setParent(step.getParent());
+      }
+
+      if (step.getDescription() != null) {
+        group.setDescription(step.getDescription());
+      }
+
+      if (step.getEnvironment() != null) {
+        group.setEnvironment(step.getEnvironment());
+      }
+
+      if (step.getEnvironmentTrumps() != null) {
+        group.setEnvironmentTrumps(step.getEnvironmentTrumps());
+      }
+
+      if (step.getClasses() != null) {
+        group.setClasses(step.getClasses());
+      }
+
+      if (step.getVariables() != null) {
+        group.setVariables(step.getVariables());
+      }
+
+      if (step.getRule() != null) {
+        group.setRule(step.getRule());
+      }
 
       String summary = "";
 
@@ -157,6 +198,16 @@ public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements S
         message.append("Message: " + e.getMessage() + "\n");
 
         throw new PEException(message.toString(), listener);
+      } catch(Exception e) {
+        StringBuilder bug = new StringBuilder();
+        bug.append("You found a bug! The Puppet Enterprise plugin received something ");
+        bug.append("it wasn't expecting while updating a node group. Please file a ticket here: ");
+        bug.append("https://issues.jenkins-ci.org/browse/JENKINS-42899?jql=project%20%3D%20JENKINS%20AND%20component%20%3D%20'puppet-enterprise-pipeline-plugin'\n\n");
+        bug.append("Include the following information:\n");
+        bug.append("Exception Type: " + e.getClass().getSimpleName() + "\n");
+        bug.append("Exception Message: " + e.getMessage() + "\n");
+
+        throw new Exception(bug.toString());
       }
 
       listener.getLogger().println("Node Group " + step.getName() + " successful.");
