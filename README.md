@@ -263,6 +263,40 @@ Use the `report` parameter. Multiple reports can be selected by using an array.
   puppet.job 'production', reports: ['resourceChanges', 'nodeChanges']
 ```
 
+**Reports**
+
+The following report types are available to be printed to the Jenkins console for each job report.
+Use the `report` parameter. Multiple reports can be selected by using an array.
+
+- nodeSummary:  Default. Shows a summary of the resource events count with a link to the Puppet Enterprise report.
+- nodeChanges:  A list of every resource event per node.
+- resourceChanges: A list of every resource event and each node that experienced the change event.
+
+
+### puppet.nodeGroup
+
+**groovy script invocation**: puppet.nodeGroup
+
+**Parameters**
+
+* name - The name of the node group. Required. String
+* description - The description of the node group. String
+* environment - The environment of the node group. String
+* rule - The rules that nodes must match to automatically be added to the node group. See the [node manager rules grammer](https://docs.puppet.com/pe/latest/nc_groups.html#rule-condition-grammar) for syntax.
+* parent - The name of the node group's parent group. Required if the node group doesn't exist already. String.
+* environmentTrumps - Whether the environment for the group should be the environment member nodes should have their catalog compiled for. Boolean
+* classes - The classes that should be assigned to the node group. Hash
+* variables - The global variables that should be assigned to the node group. Hash
+* delete - Wether or not to delete the group. It will error if the group does not exist. Boolean
+* credentials - The Jenkins credentials storing the PE RBAC token. Required if puppet.credentials not used. String
+
+```
+  puppet.nodeGroup name: "App Group", parent: "All Nodes", description: "Made by Jenkins", classes: ["class_name": ["parameterkey":"parametervalue"]], rule: ["=", ["trusted","extensions","pp_application"], "app"]
+  puppet.nodeGroup name: "App Group", classes: ["class_name": ["parameterkey":"NEWvalue"]]
+  puppet.nodeGroup name: "App Group", delete: true
+```
+
+
 ### puppet.hiera
 
 * **Scripted Pipeline invocation**: puppet.hiera
