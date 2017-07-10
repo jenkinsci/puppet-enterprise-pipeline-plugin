@@ -84,7 +84,7 @@ class Puppet implements Serializable {
     String description
     HashMap classes
     HashMap variables
-    Boolean delete
+    Boolean delete = false
 
     node {
       if (parameters.name) {
