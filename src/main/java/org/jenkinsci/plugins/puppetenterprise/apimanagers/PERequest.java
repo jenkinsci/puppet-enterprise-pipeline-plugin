@@ -174,7 +174,6 @@ public abstract class PERequest {
         if (body != null) {
           request.addHeader("content-type", "application/json");
           request.addHeader("X-Authentication", accessToken);
-          System.out.println(gson.toJson(this.body));
           StringEntity requestJson = new StringEntity(gson.toJson(this.body));
           request.setEntity(requestJson);
         }
@@ -199,8 +198,11 @@ public abstract class PERequest {
         response = httpClient.execute(request);
       }
 
-      String json = IOUtils.toString(response.getEntity().getContent());
-      System.out.println(json);
+      String json = "";
+      if (response.getEntity() != null) {
+        json = IOUtils.toString(response.getEntity().getContent());
+      }
+
       Integer responseCode = response.getStatusLine().getStatusCode();
 
       peResponse = new PEResponse(new Object(), responseCode, json);
