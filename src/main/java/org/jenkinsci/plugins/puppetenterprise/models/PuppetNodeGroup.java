@@ -142,7 +142,7 @@ public class PuppetNodeGroup {
     if (groupExists()) {
       groups.delete();
     } else {
-      throw new Exception("Group with name " + this.name + " cannot be found. Cannot delete");
+      this.logger.println("Node group " + this.name + " was not found. Skipping delete.");
     }
   }
 
