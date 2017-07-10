@@ -43,7 +43,6 @@ import com.google.gson.internal.LinkedTreeMap;
 import org.jenkinsci.plugins.puppetenterprise.PuppetEnterpriseManagement;
 import org.jenkinsci.plugins.puppetenterprise.models.PuppetNodeGroup;
 import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetnodemanagerv1.NodeManagerException;
-import org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetnodemanagerv1.NodeGroupV1;
 import org.jenkinsci.plugins.puppetenterprise.models.PEException;
 
 public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements Serializable {
