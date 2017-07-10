@@ -278,6 +278,7 @@ Use the `report` parameter. Multiple reports can be selected by using an array.
 This pipeline step creates, modifies, and deletes node groups in Puppet Enterprise's Node Manager.
 
 **Procedural pipeline invocation**: puppet.nodeGroup
+
 **Declarative piepline invocation**: puppetNodeGroup
 
 **Parameters**
