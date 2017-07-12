@@ -1,0 +1,521 @@
+[
+    {
+        "classes": {},
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "00000000-0000-4000-8000-000000000000",
+        "name": "All Nodes",
+        "parent": "00000000-0000-4000-8000-000000000000",
+        "rule": [
+            "and",
+            [
+                "~",
+                "name",
+                ".*"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "role::databaseserver": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "05b77e99-a730-4fb0-9cda-4f13e549376f",
+        "name": "Database Servers",
+        "parent": "00000000-0000-4000-8000-000000000000",
+        "rule": [
+            "or",
+            [
+                "=",
+                [
+                    "trusted",
+                    "extensions",
+                    "pp_apptier"
+                ],
+                "all"
+            ],
+            [
+                "=",
+                [
+                    "trusted",
+                    "extensions",
+                    "pp_apptier"
+                ],
+                "database"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "puppet_enterprise::license": {},
+            "puppet_enterprise::profile::console": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "0a93201c-f9e3-4315-8779-1be081bcfaac",
+        "name": "PE Console",
+        "parent": "5a585133-0680-4143-a7af-422731408027",
+        "rule": [
+            "or",
+            [
+                "=",
+                "name",
+                "master.inf.puppet.vm"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "puppet_enterprise::profile::orchestrator": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "0b24c195-fc7f-4bfc-8ce5-2eebdadea540",
+        "name": "PE Orchestrator",
+        "parent": "5a585133-0680-4143-a7af-422731408027",
+        "rule": [
+            "or",
+            [
+                "=",
+                "name",
+                "master.inf.puppet.vm"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "role::rgbank::web": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "0d4bac4e-4f8d-4d50-91a5-7083192b710f",
+        "name": "RG Bank Web Servers",
+        "parent": "67b675f3-31da-4a24-aa4a-7d7cdfeee2f6",
+        "rule": [
+            "and",
+            [
+                "~",
+                [
+                    "trusted",
+                    "extensions",
+                    "pp_apptier"
+                ],
+                "(web|all)"
+            ],
+            [
+                "=",
+                [
+                    "trusted",
+                    "extensions",
+                    "pp_application"
+                ],
+                "rgbank"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "role::ci_server": {}
+        },
+        "description": "",
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "1849fe6a-cad3-465b-8521-2632a9a3bb54",
+        "name": "Jenkins Server",
+        "parent": "00000000-0000-4000-8000-000000000000",
+        "rule": [
+            "and",
+            [
+                "=",
+                [
+                    "trusted",
+                    "extensions",
+                    "pp_role"
+                ],
+                "jenkins"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {},
+        "environment": "agent-specified",
+        "environment_trumps": true,
+        "id": "227abae6-25f8-42dd-8b00-2e0e9f6e0c35",
+        "name": "Agent-specified environment",
+        "parent": "f2005c49-51bc-4138-ba8c-8a15e00a501c",
+        "rule": [
+            "or",
+            [
+                "or",
+                [
+                    "=",
+                    [
+                        "trusted",
+                        "extensions",
+                        "pp_application"
+                    ],
+                    "rgbank"
+                ]
+            ],
+            [
+                "=",
+                "name",
+                "gitlab.inf.puppet.vm"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "puppet_enterprise::profile::agent": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "27d2d48f-53a0-479d-b3ce-fd984102eda5",
+        "name": "PE Agent",
+        "parent": "5a585133-0680-4143-a7af-422731408027",
+        "rule": [
+            "and",
+            [
+                "~",
+                [
+                    "fact",
+                    "aio_agent_version"
+                ],
+                ".+"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "puppet_enterprise::profile::puppetdb": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "39d9232a-40c3-4e67-9821-9c0890be4dd7",
+        "name": "PE PuppetDB",
+        "parent": "5a585133-0680-4143-a7af-422731408027",
+        "rule": [
+            "or",
+            [
+                "=",
+                "name",
+                "master.inf.puppet.vm"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "puppet_enterprise::profile::agent": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "3d81aed9-cc2f-432b-ad10-e702b7900239",
+        "name": "PE Infrastructure Agent",
+        "parent": "27d2d48f-53a0-479d-b3ce-fd984102eda5",
+        "rule": [
+            "and",
+            [
+                "~",
+                [
+                    "fact",
+                    "pe_server_version"
+                ],
+                ".+"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "role::jira": {}
+        },
+        "description": "",
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "481ac508-186c-406f-8b83-2bc887532b95",
+        "name": "Jira Servers",
+        "parent": "00000000-0000-4000-8000-000000000000",
+        "rule": [
+            "and",
+            [
+                "=",
+                [
+                    "trusted",
+                    "extensions",
+                    "pp_role"
+                ],
+                "jira"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "puppet_enterprise::profile::mcollective::agent": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "52f48908-ee10-441f-bf4b-7b039436f9e5",
+        "name": "PE MCollective",
+        "parent": "5a585133-0680-4143-a7af-422731408027",
+        "rule": [
+            "and",
+            [
+                "~",
+                [
+                    "fact",
+                    "aio_agent_version"
+                ],
+                ".+"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "puppet_enterprise": {
+                "certificate_authority_host": "master.inf.puppet.vm",
+                "console_host": "master.inf.puppet.vm",
+                "database_host": "master.inf.puppet.vm",
+                "mcollective_middleware_hosts": [
+                    "master.inf.puppet.vm"
+                ],
+                "pcp_broker_host": "master.inf.puppet.vm",
+                "puppet_master_host": "master.inf.puppet.vm",
+                "puppetdb_host": "master.inf.puppet.vm"
+            }
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "5a585133-0680-4143-a7af-422731408027",
+        "name": "PE Infrastructure",
+        "parent": "00000000-0000-4000-8000-000000000000",
+        "variables": {}
+    },
+    {
+        "classes": {
+            "puppet_enterprise::profile::amq::broker": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "6324536f-3df4-4eab-8a7c-ae00be078d0d",
+        "name": "PE ActiveMQ Broker",
+        "parent": "5a585133-0680-4143-a7af-422731408027",
+        "rule": [
+            "or",
+            [
+                "=",
+                "name",
+                "master.inf.puppet.vm"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "role::artifactory": {}
+        },
+        "description": "",
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "66844661-b59c-466e-826a-096c955268bc",
+        "name": "Artifactory",
+        "parent": "00000000-0000-4000-8000-000000000000",
+        "rule": [
+            "and",
+            [
+                "=",
+                [
+                    "trusted",
+                    "extensions",
+                    "pp_role"
+                ],
+                "artifactory"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {},
+        "description": "",
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "67b675f3-31da-4a24-aa4a-7d7cdfeee2f6",
+        "name": "RG Bank Application",
+        "parent": "00000000-0000-4000-8000-000000000000",
+        "rule": [
+            "and",
+            [
+                "=",
+                [
+                    "trusted",
+                    "extensions",
+                    "pp_application"
+                ],
+                "rgbank"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "puppet_enterprise::profile::certificate_authority": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "77b21312-01fb-4fe5-9f24-058a8626d5b0",
+        "name": "PE Certificate Authority",
+        "parent": "5a585133-0680-4143-a7af-422731408027",
+        "rule": [
+            "or",
+            [
+                "=",
+                "name",
+                "master.inf.puppet.vm"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "role::demo::devops::classifier": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "a8f1e99e-ca6c-4d80-a371-6d44e9d1be78",
+        "name": "PE Master Demo Role",
+        "parent": "00000000-0000-4000-8000-000000000000",
+        "rule": [
+            "=",
+            [
+                "trusted",
+                "certname"
+            ],
+            "master.inf.puppet.vm"
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "role::loadbalancer": {}
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "bdbfd06f-1bd8-48ee-9dfc-69a4b07ac092",
+        "name": "Load Balancers",
+        "parent": "00000000-0000-4000-8000-000000000000",
+        "rule": [
+            "or",
+            [
+                "=",
+                [
+                    "trusted",
+                    "extensions",
+                    "pp_apptier"
+                ],
+                "all"
+            ],
+            [
+                "=",
+                [
+                    "trusted",
+                    "extensions",
+                    "pp_apptier"
+                ],
+                "loadbalancer"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "role::gitlab": {}
+        },
+        "deleted": {
+            "role::gitlab": {
+                "puppetlabs.classifier/deleted": true
+            }
+        },
+        "description": "",
+        "environment": "hiera_demo",
+        "environment_trumps": false,
+        "id": "c1ee6f6f-5f21-4361-915e-1278334d6f70",
+        "name": "GitLab Servers",
+        "parent": "00000000-0000-4000-8000-000000000000",
+        "rule": [
+            "and",
+            [
+                "=",
+                [
+                    "trusted",
+                    "extensions",
+                    "pp_role"
+                ],
+                "gitlab"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {},
+        "environment": "production",
+        "environment_trumps": true,
+        "id": "f2005c49-51bc-4138-ba8c-8a15e00a501c",
+        "name": "Production environment",
+        "parent": "00000000-0000-4000-8000-000000000000",
+        "rule": [
+            "and",
+            [
+                "~",
+                [
+                    "trusted",
+                    "certname"
+                ],
+                ".*"
+            ]
+        ],
+        "variables": {}
+    },
+    {
+        "classes": {
+            "pe_repo": {},
+            "pe_repo::platform::el_7_x86_64": {},
+            "puppet_enterprise::profile::master": {
+                "check_for_updates": false,
+                "code_manager_auto_configure": true,
+                "r10k_private_key": "/dev/null",
+                "r10k_remote": "http://gitlab.inf.puppet.vm/rgbank/pmm-puppet-site.git"
+            },
+            "puppet_enterprise::profile::master::mcollective": {},
+            "puppet_enterprise::profile::mcollective::peadmin": {},
+            "satellite_pe_tools": {
+                "satellite_url": "https://10.32.172.82",
+                "verify_satellite_certificate": false
+            }
+        },
+        "environment": "production",
+        "environment_trumps": false,
+        "id": "f9a1a02b-6067-4fed-8552-800c1c5907d4",
+        "name": "PE Master",
+        "parent": "5a585133-0680-4143-a7af-422731408027",
+        "rule": [
+            "or",
+            [
+                "=",
+                "name",
+                "master.inf.puppet.vm"
+            ]
+        ],
+        "variables": {}
+    }
+]
