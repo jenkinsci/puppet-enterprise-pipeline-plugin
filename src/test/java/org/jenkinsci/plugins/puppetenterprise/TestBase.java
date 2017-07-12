@@ -27,13 +27,14 @@ import org.jenkinsci.plugins.workflow.steps.CodeDeployStepTest;
 import org.jenkinsci.plugins.workflow.steps.PuppetJobStepTest;
 import org.jenkinsci.plugins.workflow.steps.HieraStepTest;
 import org.jenkinsci.plugins.workflow.steps.QueryStepTest;
+import org.jenkinsci.plugins.workflow.steps.PuppetNodeGroupStepTest;
 import org.jenkinsci.plugins.puppetenterprise.api.HieraDataStoreTest;
 import org.jenkinsci.plugins.puppetenterprise.TestUtils;
 
 @RunWith(Suite.class)
 @SuiteClasses({PuppetJobStepTest.class, CodeDeployStepTest.class,
   HieraStepTest.class, QueryStepTest.class, HieraDataStoreTest.class,
-  PuppetEnterpriseManagementTest.class
+  PuppetEnterpriseManagementTest.class, PuppetNodeGroupStepTest.class
 })
 public class TestBase {
 
