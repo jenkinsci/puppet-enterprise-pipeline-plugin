@@ -55,6 +55,8 @@ public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements S
   private ArrayList rule = null;
   private HashMap classes = null;
   private HashMap variables = null;
+  private Boolean mergeClasses = false;
+  private Boolean mergeVariables = false;
   private Boolean delete = false;
 
   @DataBoundSetter private void setName(String name) {
@@ -89,8 +91,16 @@ public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements S
     this.classes = classes;
   }
 
+  @DataBoundSetter private void setMergeClasses(Boolean mergeClasses) {
+    this.mergeClasses = mergeClasses;
+  }
+
   @DataBoundSetter private void setVariables(HashMap variables) {
     this.variables = variables;
+  }
+
+  @DataBoundSetter private void setMergeVariables(Boolean mergeVariables) {
+    this.mergeVariables = mergeVariables;
   }
 
   public String getName() {
@@ -117,6 +127,14 @@ public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements S
     return this.variables;
   }
 
+  public Boolean getMergeClasses() {
+    return this.mergeClasses;
+  }
+
+  public Boolean getMergeVariables() {
+    return this.mergeVariables;
+  }
+
   public Boolean getDelete() {
     return this.delete;
   }
@@ -139,7 +157,9 @@ public final class PuppetNodeGroupStep extends PuppetEnterpriseStep implements S
 
     @Override protected Void run() throws Exception {
       PuppetNodeGroup group = new PuppetNodeGroup();
-      group.setName(step.getName());     //Required
+      group.setName(step.getName());
+      group.setMergeClasses(step.getMergeClasses());
+      group.setMergeVariables(step.getMergeVariables());
 
       if (step.getParent() != null) {
         group.setParent(step.getParent());
