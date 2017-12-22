@@ -20,6 +20,8 @@ public class PuppetNodeGroup {
   private ArrayList rule = null;
   private HashMap classes = new HashMap();
   private HashMap variables = new HashMap();
+  private Boolean mergeClasses = null;
+  private Boolean mergeVariables = null;
   private PrintStream logger = null;
   private ArrayList<NodeGroupV1> groups = null;
   private String token = null;
@@ -66,6 +68,14 @@ public class PuppetNodeGroup {
     this.variables = variables;
   }
 
+  public void setMergeClasses(Boolean mergeClasses) {
+    this.mergeClasses = mergeClasses;
+  }
+
+  public void setMergeVariables(Boolean mergeVariables) {
+    this.mergeVariables = mergeVariables;
+  }
+
   public void setLogger(PrintStream logger) {
     this.logger = logger;
   }
@@ -104,20 +114,54 @@ public class PuppetNodeGroup {
     if (groupExists()) {
       NodeGroupV1 group = getGroup(this.name);
 
-      if (this.rule != null) {
-        throw new Exception("The existing node group named \"" + this.name + "\" cannot have its rule updated.");
-      }
-
-      if (this.parent != null) {
-        groups.setParent(this.parent);
-      } else {
-        groups.setParent(group.getParent());
-      }
-
       if (this.description != null) {
         groups.setDescription(this.description);
       } else {
         groups.setDescription(group.getDescription());
+      }
+
+      if (this.environment != null) {
+        groups.setEnvironment(this.environment);
+      } else {
+        groups.setEnvironment(group.getEnvironment());
+      }
+
+      if (this.environment_trumps != null) {
+        groups.setEnvironmentTrumps(this.environment_trumps);
+      } else {
+        groups.setEnvironmentTrumps(group.getEnvironmentTrumps());
+      }
+
+      if (this.rule != null) {
+        groups.setRule(this.rule);
+      } else {
+        groups.setRule(group.getRule());
+      }
+
+      if (this.classes != null) {
+        if (this.mergeClasses) {
+          HashMap mergedClasses = new HashMap();
+          mergedClasses.putAll(group.getClasses());
+          mergedClasses.putAll(this.classes);
+          groups.setClasses(mergedClasses);
+        } else {
+          groups.setVariables(this.variables);
+        }
+      } else {
+        groups.setClasses(group.getClasses());
+      }
+
+      if (this.variables != null) {
+        if (this.mergeVariables) {
+          HashMap mergedVariables = new HashMap();
+          mergedVariables.putAll(group.getVariables());
+          mergedVariables.putAll(this.variables);
+          groups.setVariables(mergedVariables);
+        } else {
+          groups.setVariables(this.variables);
+        }
+      } else {
+        groups.setVariables(group.getVariables());
       }
 
       groups.setId(group.getId());
@@ -126,6 +170,26 @@ public class PuppetNodeGroup {
     } else {
       if (this.rule != null) {
         groups.setRule(this.rule);
+      }
+
+      if (this.description != null) {
+        groups.setDescription(this.description);
+      }
+
+      if (this.classes != null) {
+        groups.setClasses(this.classes);
+      }
+
+      if (this.variables != null) {
+        groups.setVariables(this.variables);
+      }
+
+      if (this.environment != null) {
+        groups.setEnvironment(this.environment);
+      }
+
+      if (this.environment_trumps != null) {
+        groups.setEnvironmentTrumps(this.environment_trumps);
       }
 
       groups.create();
