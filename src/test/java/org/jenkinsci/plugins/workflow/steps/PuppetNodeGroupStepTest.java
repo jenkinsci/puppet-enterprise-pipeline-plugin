@@ -132,4 +132,302 @@ public class PuppetNodeGroupStepTest extends Assert {
     });
   }
 
+  @Theory
+  public void puppetNodeGroupWithCredentialsCallSuccessful(final String peVersion) throws Exception {
+
+    mockNodeManagerService.stubFor(get(urlEqualTo("/classifier-api/v1/groups"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/node-manager", "groups.json"))));
+
+    mockNodeManagerService.stubFor(post(urlEqualTo("/classifier-api/v1/groups"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        //Create a job where the credentials are defined separately
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Node Group with Credentials Defined Separately Against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'Test Group', description: 'created by Jenkins', parent: 'All Nodes', rule: ['=', ['trusted', 'extensions', 'pp_application'], 'app']\n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(getRequestedFor(urlMatching("/classifier-api/v1/groups"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+
+        verify(postRequestedFor(urlMatching("/classifier-api/v1/groups"))
+            .withRequestBody(equalToJson("{\"environment\":\"production\",\"name\":\"Test Group\",\"description\":\"created by Jenkins\",\"parent\":\"00000000-0000-4000-8000-000000000000\",\"rule\": [ \"=\", [ \"trusted\", \"extensions\", \"pp_application\" ], \"app\" ], \"classes\": { }, \"variables\": { } }"))
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+  }
+
+  @Theory
+  public void puppetNodeGroupCreateNodeGroupIfNotExists(final String peVersion) throws Exception {
+
+    mockNodeManagerService.stubFor(get(urlEqualTo("/classifier-api/v1/groups"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/node-manager", "groups.json"))));
+
+    mockNodeManagerService.stubFor(post(urlEqualTo("/classifier-api/v1/groups"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Node Group Creates Node Group If It Does Not Exist against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'Non-Existent Group', parent: 'All Nodes' \n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(getRequestedFor(urlMatching("/classifier-api/v1/groups"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+
+        verify(postRequestedFor(urlMatching("/classifier-api/v1/groups"))
+            .withRequestBody(equalToJson("{\"environment\":\"production\",\"name\":\"Non-Existent Group\",\"parent\":\"00000000-0000-4000-8000-000000000000\",\"rule\": [ ], \"classes\": { }, \"variables\": { } }"))
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+  }
+
+  @Theory
+  public void puppetNodeGroupUpdateExistingGroup(final String peVersion) throws Exception {
+
+    mockNodeManagerService.stubFor(get(urlEqualTo("/classifier-api/v1/groups"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/node-manager", "groups.json"))));
+
+    mockNodeManagerService.stubFor(put(urlEqualTo("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(201)));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Environment Parameter Is Updated Against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'PE ActiveMQ Broker', environment: 'qa' \n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(putRequestedFor(urlMatching("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+            .withRequestBody(equalToJson("{\"environment\":\"qa\",\"environment_trumps\": false, \"name\":\"PE ActiveMQ Broker\",\"parent\":\"5a585133-0680-4143-a7af-422731408027\",\"rule\": [ \"or\", [\"=\", \"name\", \"master.inf.puppet.vm\"]], \"classes\": { \"puppet_enterprise::profile::amq::broker\": {}}, \"variables\": { }, \"id\": \"6324536f-3df4-4eab-8a7c-ae00be078d0d\" }"))
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Environment Trumps Parameter Is Updated Against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'PE ActiveMQ Broker', environment_trumps: true \n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(putRequestedFor(urlMatching("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+            .withRequestBody(equalToJson("{\"environment\":\"production\",\"environment_trumps\": true, \"name\":\"PE ActiveMQ Broker\",\"parent\":\"66844661-b59c-466e-826a-096c955268bc\",\"rule\": [ \"or\", [\"=\", \"name\", \"master.inf.puppet.vm\"]], \"classes\": { \"puppet_enterprise::profile::amq::broker\": {}}, \"variables\": { }, \"id\": \"6324536f-3df4-4eab-8a7c-ae00be078d0d\" }"))
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Parent Parameter Is Updated Against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'PE ActiveMQ Broker', parent: \"66844661-b59c-466e-826a-096c955268bc\"\n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(putRequestedFor(urlMatching("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+            .withRequestBody(equalToJson("{\"environment\":\"production\",\"environment_trumps\": false, \"name\":\"PE ActiveMQ Broker\",\"parent\":\"66844661-b59c-466e-826a-096c955268bc\",\"rule\": [ \"or\", [\"=\", \"name\", \"master.inf.puppet.vm\"]], \"classes\": { \"puppet_enterprise::profile::amq::broker\": {}}, \"variables\": { }, \"id\": \"6324536f-3df4-4eab-8a7c-ae00be078d0d\" }"))
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Rule Parameter Is Updated Against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'PE ActiveMQ Broker', rule: [ \"=\", \"name\", \"newnode\"]\n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(putRequestedFor(urlMatching("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+            .withRequestBody(equalToJson("{\"environment\":\"production\",\"environment_trumps\": false, \"name\":\"PE ActiveMQ Broker\",\"parent\":\"66844661-b59c-466e-826a-096c955268bc\",\"rule\": [ \"=\", \"name\", \"newnode\"], \"classes\": { \"puppet_enterprise::profile::amq::broker\": {}}, \"variables\": { }, \"id\": \"6324536f-3df4-4eab-8a7c-ae00be078d0d\" }"))
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Classes Parameter Is Merged Against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'PE ActiveMQ Broker', mergeClasses: true, classes: [ \"newclass\": [\"parameterkey\": \"parametervalue\"]]\n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(putRequestedFor(urlMatching("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+            .withRequestBody(equalToJson("{\"environment\":\"production\",\"environment_trumps\": false, \"name\":\"PE ActiveMQ Broker\",\"parent\":\"66844661-b59c-466e-826a-096c955268bc\",\"rule\": [ \"=\", \"name\", \"newnode\"], \"classes\": { \"puppet_enterprise::profile::amq::broker\": {}, \"newclass\": { \"parameterkey\": \"parametervalue\"}}, \"variables\": { }, \"id\": \"6324536f-3df4-4eab-8a7c-ae00be078d0d\" }"))
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Classes Parameter Is Updated Against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'PE ActiveMQ Broker', classes: [ \"newclass\": [\"parameterkey\": \"parametervalue\"]]\n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(putRequestedFor(urlMatching("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+            .withRequestBody(equalToJson("{\"environment\":\"production\",\"environment_trumps\": false, \"name\":\"PE ActiveMQ Broker\",\"parent\":\"66844661-b59c-466e-826a-096c955268bc\",\"rule\": [ \"=\", \"name\", \"newnode\"], \"classes\": { \"newclass\": { \"parameterkey\": \"parametervalue\"}}, \"variables\": { }, \"id\": \"6324536f-3df4-4eab-8a7c-ae00be078d0d\" }"))
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Variables Parameter Is Merged Against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'Artifactory', mergeVariables: true, variables: \"variables\": [ \"newvariable\": \"newvalue\"]\n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(putRequestedFor(urlMatching("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+            .withRequestBody(equalToJson("{\"environment\":\"production\",\"environment_trumps\": false, \"name\":\"Artifactory\",\"parent\":\"66844661-b59c-466e-826a-096c955268bc\",\"rule\": [ \"=\", \"name\", \"newnode\"], \"classes\": { \"newclass\": { \"parameterkey\": \"parametervalue\"}}, \"variables\": { \"my-app\", \"value\", \"newvariable\": \"newvalue\" }, \"id\": \"6324536f-3df4-4eab-8a7c-ae00be078d0d\" }"))
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Variables Parameter Is Replaced Against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'PE ActiveMQ Broker', variables: \"variables\": [ \"newvariable\": \"newvalue\"]\n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(putRequestedFor(urlMatching("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+            .withRequestBody(equalToJson("{\"environment\":\"production\",\"environment_trumps\": false, \"name\":\"PE ActiveMQ Broker\",\"parent\":\"66844661-b59c-466e-826a-096c955268bc\",\"rule\": [ \"=\", \"name\", \"newnode\"], \"classes\": { \"newclass\": { \"parameterkey\": \"parametervalue\"}}, \"variables\": { \"newvariable\": \"newvalue\" }, \"id\": \"6324536f-3df4-4eab-8a7c-ae00be078d0d\" }"))
+            .withHeader("Content-Type", matching("application/json"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+  }
+
+  @Theory
+  public void puppetNodeDeleteGroupThatExistsSucceeds(final String peVersion) throws Exception {
+
+    mockNodeManagerService.stubFor(get(urlEqualTo("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/node-manager", "groups.json"))));
+
+    mockNodeManagerService.stubFor(delete(urlEqualTo("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(204)));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Node Group Delete Node Group If It Exists Against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'PE ActiveMQ Broker', delete: true \n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(deleteRequestedFor(urlMatching("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+  }
+
+  @Theory
+  public void puppetNodeDeleteGroupThatDoesNotExistFails(final String peVersion) throws Exception {
+
+    mockNodeManagerService.stubFor(get(urlEqualTo("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(200)
+            .withHeader("Content-Type", "application/json")
+            .withBody(TestUtils.getAPIResponseBody(peVersion, "/node-manager", "groups.json"))));
+
+    mockNodeManagerService.stubFor(delete(urlEqualTo("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+        .withHeader("X-Authentication", equalTo("super_secret_token_string"))
+        .willReturn(aResponse()
+            .withStatus(404)));
+
+    story.addStep(new Statement() {
+      @Override
+      public void evaluate() throws Throwable {
+
+        WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Node Group Delete Node Group If It Does Not Exist Against " + peVersion);
+        job.setDefinition(new CpsFlowDefinition(
+          "node { \n" +
+          "  puppet.nodeGroup credentials: 'pe-test-token', name: 'PE ActiveMQ Broker', delete: true \n" +
+          "}", true));
+        story.j.assertBuildStatusSuccess(job.scheduleBuild2(0));
+
+        verify(deleteRequestedFor(urlMatching("/classifier-api/v1/groups/6324536f-3df4-4eab-8a7c-ae00be078d0d"))
+            .withHeader("X-Authentication", matching("super_secret_token_string")));
+      }
+    });
+  }
 }
