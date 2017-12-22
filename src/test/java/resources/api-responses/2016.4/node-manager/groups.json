@@ -343,7 +343,9 @@
                 "artifactory"
             ]
         ],
-        "variables": {}
+        "variables": {
+          "my-app": "value"
+        }
     },
     {
         "classes": {},
