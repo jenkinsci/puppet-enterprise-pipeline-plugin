@@ -126,7 +126,7 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
 
   @DataBoundConstructor public PuppetJobStep() { }
 
-  public static class PuppetJobStepExecution extends AbstractSynchronousStepExecution<Void> {
+  public static class PuppetJobStepExecution extends AbstractSynchronousStepExecution<String> {
 
     @Inject private transient PuppetJobStep step;
     @StepContextParameter private transient Run<?, ?> run;
@@ -136,7 +136,7 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
       value = "DLS_DEAD_LOCAL_STORE",
       justification = "Findbugs is wrong. The variable is not a dead store."
     )
-    @Override protected Void run() throws Exception {
+    @Override protected String run() throws Exception {
       PuppetJob job = new PuppetJob();
       job.setConcurrency(step.getConcurrency());
       job.setNoop(step.getNoop());
@@ -192,7 +192,7 @@ public final class PuppetJobStep extends PuppetEnterpriseStep implements Seriali
         throw new PEException(message.toString(), listener);
       }
 
-      return null;
+      return job.getName();
     }
 
     private static final long serialVersionUID = 1L;
