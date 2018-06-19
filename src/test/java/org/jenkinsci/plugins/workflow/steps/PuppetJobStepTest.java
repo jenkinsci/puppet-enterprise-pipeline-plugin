@@ -168,7 +168,8 @@ public class PuppetJobStepTest extends Assert {
         WorkflowJob job = story.j.jenkins.createProject(WorkflowJob.class, "Puppet Job with Credentials Defined With Method Call Against " + peVersion);
         job.setDefinition(new CpsFlowDefinition(
           "node { \n" +
-          "  puppet.job 'production', credentials: 'pe-test-token'\n" +
+          "  jobId = puppet.job 'production', credentials: 'pe-test-token'\n" +
+          "  echo \"Returned job id: ${jobId}\"" +
           "}", true));
         WorkflowRun result = job.scheduleBuild2(0).get();
         story.j.assertBuildStatusSuccess(result);
@@ -177,6 +178,7 @@ public class PuppetJobStepTest extends Assert {
         story.j.assertLogContains("State: finished", result);
         story.j.assertLogContains("Environment: production", result);
         story.j.assertLogContains("Nodes: 11", result);
+        story.j.assertLogContains("Returned job id: 711", result);
 
         if (peVersion.equals("2016.2")) {
           //Previous to 2016.4, PE did not support corrective changes
