@@ -29,7 +29,7 @@ public abstract class PuppetEnterpriseStep extends AbstractStepImpl implements S
   }
 
   public String getToken() {
-    return lookupCredentials(credentialsId).getSecret().toString();
+    return lookupCredentials(credentialsId).getSecret().getPlainText();
   }
 
   public String getCredentialsId() {
