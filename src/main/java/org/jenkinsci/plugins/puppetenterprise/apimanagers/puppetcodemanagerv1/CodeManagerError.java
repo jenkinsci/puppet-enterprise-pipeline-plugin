@@ -2,7 +2,7 @@ package org.jenkinsci.plugins.puppetenterprise.apimanagers.puppetcodemanagerv1;
 
 import com.google.gson.internal.LinkedTreeMap;
 
-public class CodeManagerRBACError {
+public class CodeManagerError {
   private String kind = null;
   private String msg = null;
   private LinkedTreeMap<String,String> subject = null;
